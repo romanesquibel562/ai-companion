@@ -7,9 +7,9 @@ camera:
   fps: 30
 
 detector:
-  backend: mock         # mock | hailo_yolov8
-  model_path: ""
-  confidence_threshold: 0.5
+  backend: hailo_yolov8   # mock | hailo_yolov8
+  model_path: "/usr/share/hailo-models/yolov8s_h8l.hef"
+  confidence_threshold: 0.4
 
 face_recognizer:
   backend: mock          # mock | opencv_lbph

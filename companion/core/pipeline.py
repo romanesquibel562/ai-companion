@@ -40,3 +40,4 @@ class Pipeline:
 
     def close(self) -> None:
         self.camera.close()
+        self.detector.close()
