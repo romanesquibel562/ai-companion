@@ -5,15 +5,76 @@
   <title>AI Companion</title>
   <style>
     body { background: #111; color: #eee; font-family: sans-serif; text-align: center; }
-    img { max-width: 90vw; border: 2px solid #333; border-radius: 8px; margin-top: 16px; }
+    .layout { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 16px; }
+    img { max-width: 44vw; border: 2px solid #333; border-radius: 8px; }
     pre { text-align: left; display: inline-block; background: #1a1a1a; padding: 12px; border-radius: 6px; }
+
+    #terminal {
+      width: 44vw;
+      min-width: 320px;
+      background: #000;
+      border: 2px solid #0f0;
+      border-radius: 8px;
+      font-family: "Consolas", "Courier New", monospace;
+      color: #0f0;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      height: 480px;
+    }
+    #terminal-log {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    #terminal-log .you { color: #6cf; }
+    #terminal-log .companion { color: #0f0; }
+    #terminal-log .error { color: #f55; }
+    #terminal-form {
+      display: flex;
+      border-top: 1px solid #0f0;
+    }
+    #terminal-input {
+      flex: 1;
+      background: #000;
+      color: #0f0;
+      border: none;
+      padding: 10px;
+      font-family: inherit;
+      font-size: 1em;
+    }
+    #terminal-input:focus { outline: none; }
+    #terminal-form button {
+      background: #0f0;
+      color: #000;
+      border: none;
+      padding: 0 16px;
+      font-family: inherit;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <h1>AI Companion — Live View</h1>
-  <img src="/stream" alt="live camera stream" />
-  <h3>Detections</h3>
-  <pre id="detections">loading...</pre>
+  <div class="layout">
+    <div>
+      <img src="/stream" alt="live camera stream" />
+      <h3>Detections</h3>
+      <pre id="detections">loading...</pre>
+    </div>
+
+    <div id="terminal">
+      <div id="terminal-log">companion@pi:~$ ready. ask me anything, including code.
+</div>
+      <form id="terminal-form">
+        <input id="terminal-input" type="text" placeholder="type a message..." autocomplete="off" />
+        <button type="submit">send</button>
+      </form>
+    </div>
+  </div>
+
   <script>
     async function poll() {
       try {
@@ -24,6 +85,44 @@
       setTimeout(poll, 1000);
     }
     poll();
+
+    const log = document.getElementById('terminal-log');
+    const form = document.getElementById('terminal-form');
+    const input = document.getElementById('terminal-input');
+
+    function appendLine(cls, text) {
+      const span = document.createElement('span');
+      span.className = cls;
+      span.textContent = text + '\n';
+      log.appendChild(span);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = input.value.trim();
+      if (!message) return;
+      appendLine('you', '> ' + message);
+      input.value = '';
+      try {
+        const res = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message }),
+        });
+        const data = await res.json();
+        appendLine('companion', data.reply ?? '(no reply)');
+        if (data.reply) {
+          fetch('/speak', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: data.reply }),
+          }).catch(() => {});
+        }
+      } catch (err) {
+        appendLine('error', 'error: could not reach companion');
+      }
+    });
   </script>
 </body>
 </html>

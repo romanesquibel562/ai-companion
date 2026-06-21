@@ -28,7 +28,11 @@ def draw_detections(frame: np.ndarray, detections: list[Detection]) -> np.ndarra
 
         label = det.label
         if det.label == "person":
-            label = "owner" if det.is_owner else ("unknown" if det.is_owner is False else "person")
+            label = (
+                "Roman AKA Master"
+                if det.is_owner
+                else ("unknown" if det.is_owner is False else "person")
+            )
         if det.track_id is not None:
             label = f"{label} #{det.track_id}"
         if det.distance_m is not None:

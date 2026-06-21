@@ -39,11 +39,28 @@ class WebConfig:
 
 
 @dataclass
+class LLMConfig:
+    backend: str = "mock"  # "mock" | "ollama"
+    model: str = "llama3.2"
+    host: str = "http://localhost:11434"
+
+
+@dataclass
+class VoiceConfig:
+    backend: str = "mock"  # "mock" | "piper"
+    model_path: str = "data/voices/en_US-norman-medium.onnx"
+    length_scale: float = 1.15  # >1 = slower, more deliberate delivery
+    pitch_scale: float = 0.92  # <1 = deeper pitch
+
+
+@dataclass
 class CompanionConfig:
     camera: CameraConfig = field(default_factory=CameraConfig)
     detector: DetectorConfig = field(default_factory=DetectorConfig)
     face_recognizer: FaceRecognizerConfig = field(default_factory=FaceRecognizerConfig)
     web: WebConfig = field(default_factory=WebConfig)
+    llm: LLMConfig = field(default_factory=LLMConfig)
+    voice: VoiceConfig = field(default_factory=VoiceConfig)
     addons: list[str] = field(default_factory=list)
 
 
@@ -72,6 +89,10 @@ def load_config(path: Path = CONFIG_PATH) -> CompanionConfig:
         )
     if "web" in raw:
         cfg.web = WebConfig(**_merge(cfg.web.__dict__.copy(), raw["web"]))
+    if "llm" in raw:
+        cfg.llm = LLMConfig(**_merge(cfg.llm.__dict__.copy(), raw["llm"]))
+    if "voice" in raw:
+        cfg.voice = VoiceConfig(**_merge(cfg.voice.__dict__.copy(), raw["voice"]))
     if "addons" in raw:
         cfg.addons = list(raw["addons"])
     return cfg

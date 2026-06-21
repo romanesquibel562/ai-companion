@@ -12,11 +12,22 @@ detector:
   confidence_threshold: 0.4
 
 face_recognizer:
-  backend: mock          # mock | opencv_lbph
+  backend: opencv_lbph   # mock | opencv_lbph
   owner_name: owner
 
 web:
   host: 0.0.0.0
   port: 8000
+
+llm:
+  backend: ollama        # mock | ollama
+  model: qwen2.5-coder:3b
+  host: http://localhost:11434
+
+voice:
+  backend: piper          # mock | piper
+  model_path: "data/voices/en_US-norman-medium.onnx"
+  length_scale: 1.15      # >1 = slower, more deliberate delivery
+  pitch_scale: 0.92       # <1 = deeper pitch
 
 addons: []

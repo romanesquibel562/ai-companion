@@ -8,11 +8,22 @@ import cv2
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 from starlette.requests import Request
 
 from companion.addons.registry import AddonRegistry
 from companion.config import CompanionConfig, load_config
 from companion.core.pipeline import Pipeline
+from companion.llm.companion_llm import create_companion_llm
+from companion.voice.io import create_voice_io
+
+
+class ChatRequest(BaseModel):
+    message: str
+
+
+class SpeakRequest(BaseModel):
+    text: str
 
 TEMPLATES = Jinja2Templates(directory=str(__file__.rsplit("/", 1)[0] + "/templates"))
 
@@ -60,6 +71,8 @@ def create_app(config: CompanionConfig | None = None) -> FastAPI:
     worker = PipelineWorker(config)
     worker.start()
     app.state.worker = worker
+    llm = create_companion_llm(config.llm)
+    voice = create_voice_io(config.voice)
 
     @app.get("/", response_class=HTMLResponse)
     def index(request: Request):
@@ -91,6 +104,31 @@ def create_app(config: CompanionConfig | None = None) -> FastAPI:
             }
             for d in worker.latest_detections()
         ]
+
+    @app.post("/chat")
+    def chat(req: ChatRequest):
+        detections = worker.latest_detections()
+        parts = []
+        for d in detections:
+            if d.label != "person":
+                parts.append(d.label)
+            elif d.is_owner is True:
+                parts.append("person identified as Roman, your owner")
+            elif d.is_owner is False:
+                parts.append("person present, but face does not match Roman (unrecognized)")
+            else:
+                parts.append("person present, face not clearly visible to confirm identity")
+        scene_context = ", ".join(parts) or "nothing in view"
+        reply = llm.chat(req.message, scene_context=scene_context)
+        return {"reply": reply}
+
+    @app.post("/speak")
+    def speak(req: SpeakRequest):
+        try:
+            voice.speak(req.text)
+            return {"ok": True}
+        except Exception as exc:
+            return {"ok": False, "error": str(exc)}
 
     @app.on_event("shutdown")
     def shutdown():
