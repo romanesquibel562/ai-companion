@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.env
+data/faces/*.jpg
+data/faces/*.png
+!data/faces/.gitkeep
+*.log
+.DS_Store

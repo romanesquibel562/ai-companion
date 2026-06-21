@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>AI Companion</title>
+  <style>
+    body { background: #111; color: #eee; font-family: sans-serif; text-align: center; }
+    img { max-width: 90vw; border: 2px solid #333; border-radius: 8px; margin-top: 16px; }
+    pre { text-align: left; display: inline-block; background: #1a1a1a; padding: 12px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>AI Companion — Live View</h1>
+  <img src="/stream" alt="live camera stream" />
+  <h3>Detections</h3>
+  <pre id="detections">loading...</pre>
+  <script>
+    async function poll() {
+      try {
+        const res = await fetch('/detections');
+        const data = await res.json();
+        document.getElementById('detections').textContent = JSON.stringify(data, null, 2);
+      } catch (e) {}
+      setTimeout(poll, 1000);
+    }
+    poll();
+  </script>
+</body>
+</html>

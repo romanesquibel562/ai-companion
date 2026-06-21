@@ -1,0 +1,22 @@
+# Switch backends here as hardware comes online.
+# "mock" backends need no hardware/SDKs and are used for local dev.
+
+camera:
+  backend: mock        # mock | picamera2
+  resolution: [640, 480]
+  fps: 30
+
+detector:
+  backend: mock         # mock | hailo_yolov8
+  model_path: ""
+  confidence_threshold: 0.5
+
+face_recognizer:
+  backend: mock          # mock | opencv_lbph
+  owner_name: owner
+
+web:
+  host: 0.0.0.0
+  port: 8000
+
+addons: []

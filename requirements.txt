@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+jinja2
+opencv-python
+numpy
+pyyaml
+
+# Pi 5 / Hailo HAT+ hardware backends (install on-device, not needed for mock dev mode)
+# picamera2
+# hailo-platform
+
+# Local LLM glue (phase 2)
+# ollama
+
+# Face embeddings (phase 1, swap in once backend is chosen)
+# face-recognition
