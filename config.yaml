@@ -2,7 +2,7 @@
 # "mock" backends need no hardware/SDKs and are used for local dev.
 
 camera:
-  backend: mock        # mock | picamera2
+  backend: picamera2    # mock | picamera2
   resolution: [640, 480]
   fps: 30
 

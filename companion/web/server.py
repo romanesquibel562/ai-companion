@@ -97,6 +97,3 @@ def create_app(config: CompanionConfig | None = None) -> FastAPI:
         worker.stop()
 
     return app
-
-
-app = create_app()
