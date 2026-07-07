@@ -51,6 +51,9 @@ class VoiceConfig:
     model_path: str = "data/voices/en_US-norman-medium.onnx"
     length_scale: float = 1.15  # >1 = slower, more deliberate delivery
     pitch_scale: float = 0.92  # <1 = deeper pitch
+    stt_model_path: str = "data/models/vosk-en"
+    mic_device: str = "plughw:2,0"  # ALSA device for USB mic
+    listen_seconds: int = 5
 
 
 @dataclass

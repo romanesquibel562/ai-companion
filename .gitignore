@@ -9,3 +9,5 @@ data/faces/*.png
 !data/faces/.gitkeep
 *.log
 .DS_Store
+data/models/
+data/voices/

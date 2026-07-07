@@ -29,5 +29,8 @@ voice:
   model_path: "data/voices/en_US-norman-medium.onnx"
   length_scale: 1.15      # >1 = slower, more deliberate delivery
   pitch_scale: 0.92       # <1 = deeper pitch
+  stt_model_path: "data/models/vosk-en"
+  mic_device: "plughw:2,0"
+  listen_seconds: 5
 
 addons: []

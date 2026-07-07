@@ -130,6 +130,14 @@ def create_app(config: CompanionConfig | None = None) -> FastAPI:
         except Exception as exc:
             return {"ok": False, "error": str(exc)}
 
+    @app.post("/listen")
+    def listen():
+        try:
+            text = voice.listen()
+            return {"ok": True, "text": text}
+        except Exception as exc:
+            return {"ok": False, "error": str(exc)}
+
     @app.on_event("shutdown")
     def shutdown():
         worker.stop()

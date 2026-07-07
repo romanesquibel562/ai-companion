@@ -54,6 +54,24 @@
       font-family: inherit;
       cursor: pointer;
     }
+    #ptt-btn {
+      display: block;
+      width: 100%;
+      margin-top: 8px;
+      padding: 10px;
+      background: #111;
+      color: #0f0;
+      border: 1px solid #0f0;
+      border-radius: 6px;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 1em;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+    }
+    #ptt-btn.listening {
+      background: #0f0;
+      color: #000;
+    }
   </style>
 </head>
 <body>
@@ -72,10 +90,54 @@
         <input id="terminal-input" type="text" placeholder="type a message..." autocomplete="off" />
         <button type="submit">send</button>
       </form>
+      <button id="ptt-btn">[ hold to speak ]</button>
     </div>
   </div>
 
   <script>
+    // Push-to-talk: click starts recording (server-side), click again cancels next
+    // The server records for listen_seconds then returns the transcript.
+    const pttBtn = document.getElementById('ptt-btn');
+    let pttActive = false;
+
+    async function doListen() {
+      if (pttActive) return;
+      pttActive = true;
+      pttBtn.textContent = '[ listening... ]';
+      pttBtn.classList.add('listening');
+      try {
+        const res = await fetch('/listen', { method: 'POST' });
+        const data = await res.json();
+        if (data.ok && data.text) {
+          appendLine('you', '> ' + data.text);
+          const chatRes = await fetch('/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: data.text }),
+          });
+          const chatData = await chatRes.json();
+          appendLine('companion', chatData.reply ?? '(no reply)');
+          if (chatData.reply) {
+            fetch('/speak', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text: chatData.reply }),
+            }).catch(() => {});
+          }
+        } else {
+          appendLine('error', 'mic: ' + (data.error ?? 'nothing heard'));
+        }
+      } catch (err) {
+        appendLine('error', 'error: could not reach companion');
+      } finally {
+        pttActive = false;
+        pttBtn.textContent = '[ hold to speak ]';
+        pttBtn.classList.remove('listening');
+      }
+    }
+
+    pttBtn.addEventListener('click', doListen);
+  </script>
     async function poll() {
       try {
         const res = await fetch('/detections');
