@@ -4,8 +4,7 @@ __pycache__/
 venv/
 *.egg-info/
 .env
-data/faces/*.jpg
-data/faces/*.png
+data/faces/
 !data/faces/.gitkeep
 *.log
 .DS_Store
